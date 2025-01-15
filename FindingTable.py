@@ -11,6 +11,47 @@ import glob
 import sys
 import struct
 
+def relocate_data(old_path, new_path):
+    for root, dirs, files in os.walk(old_path):
+        for dir in dirs:
+            relocate_data(root + "\\" + dir, new_path)
+
+        list_files_bmp = glob.glob('*' + '.bmp', root_dir=old_path)
+        list_files_xml = glob.glob('*' + '.xml', root_dir=old_path)
+
+        for file_bmp in list_files_bmp:
+            if file_bmp.endswith('.bmp') and file_bmp != "blue_mask.bmp":
+                try:
+                    shutil.copy2(old_path + "\\" + file_bmp, new_path + "\\" + file_bmp)
+                except:
+                    print("bmp: ", file_bmp)
+
+
+        for file_xml in list_files_xml:
+            if file_xml.endswith('.xml'):
+                filename = os.path.basename(os.path.dirname(old_path + "\\" + file_xml)) + ".xml"
+                try:
+                    os.rename(old_path + "\\" + file_xml, old_path + "\\" + filename)
+                    shutil.copy2(old_path + "\\" + filename, new_path + "\\" + filename)
+                except:
+                    print("xml: ", file_xml)
+                    print(filename)
+                    print(old_path)
+
+
+
+
+def del_json(global_way):
+    for root, dirs, files in os.walk(global_way):
+        for dir in dirs:
+            del_json(root + "\\" + dir)
+
+        for file in files:
+            if file.endswith('.json'):
+                print(file)
+                os.remove(global_way + "\\" + file)
+
+
 def get_bmp_depth(way):
     bpp = 0
     # Read first 100 bytes
@@ -257,27 +298,6 @@ def find_columns(way, name_of_pic, make_dir=False):
     tr = ET.ElementTree(root)
     tr.write(new_path + "\\" + "data.xml")
 
-    # ex_object = ET.SubElement(root, 'object')
-    # ex_name = ET.SubElement(ex_object, 'name')
-    # ex_name.text = "column"
-    # ex_pose = ET.SubElement(ex_object, 'pose')
-    # ex_pose.text = "Unspecified"
-    # ex_truncated = ET.SubElement(ex_object, 'truncated')
-    # ex_truncated.text = "0"
-    # ex_difficult = ET.SubElement(ex_object, 'difficult')
-    # ex_difficult.text = "0"
-    #
-    # ex_bndbox = ET.SubElement(ex_object, 'bndbox')
-    # ex_xmin = ET.SubElement(ex_bndbox, 'xmin')
-    # ex_xmin.text = "0"
-    # ex_ymin = ET.SubElement(ex_bndbox, 'ymin')
-    # ex_ymin.text = "0"
-    # ex_xmax = ET.SubElement(ex_bndbox, 'xmax')
-    # ex_xmax.text = "0"
-    # ex_ymax = ET.SubElement(ex_bndbox, 'ymax')
-    # ex_ymax.text = "0"
-
-
     # with open(new_path + "\\" + 'data.json', 'w') as outfile:
     #     json.dump(dict_column, outfile)
 
@@ -285,6 +305,8 @@ def find_columns(way, name_of_pic, make_dir=False):
 # mass_mk_dir(r"C:\Users\79118\OneDrive\Документы\Перечни")
 # find_tables(r"C:\Users\79118\OneDrive\Документы\perechni")
 # rename_dir(r"C:\perechni")
-find_tables(r"C:\perechnicopy")
-
+# find_tables(r"C:\perechnicopy")
+# del_json(r"C:\perechnicopy")
 # convert_bmp_to_jpeg(r"C:\perechnicopy")
+
+relocate_data(r"C:\perechnicopy", r"C:\perechni_new")
